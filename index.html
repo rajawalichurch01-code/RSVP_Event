@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSVP Event Konfirmasi</title>
-    <!-- Tailwind CSS (Tanpa install, langsung via CDN) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Animasi loading sederhana */
         .loader {
             border: 3px solid #f3f3f3;
             border-radius: 50%;
@@ -20,200 +19,583 @@
             display: inline-block;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .print-table { width: 100%; border-collapse: collapse; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center py-8 px-4">
+<body class="bg-slate-50 font-sans min-h-screen">
 
-    <div class="max-w-lg w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+    <!-- ========================================== -->
+    <!-- TAMPILAN GUEST (FORM RSVP)                 -->
+    <!-- ========================================== -->
+    <div id="guestView" class="flex flex-col items-center justify-center py-8 px-4 no-print">
         
-        <!-- BAGIAN 1: BANNER EVENT -->
-        <!-- Ganti src URL di bawah dengan link gambar banner Anda jika ada -->
-        <div class="h-56 sm:h-64 bg-slate-200 relative">
-            <img 
-                src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                alt="Banner Event" 
-                class="w-full h-full object-cover"
-            />
+        <!-- Tombol Masuk ke Admin -->
+        <div id="adminAccessBtn" class="w-full max-w-lg flex justify-end mb-4">
+            <button onclick="toggleView('admin')" class="text-xs flex items-center bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full hover:bg-slate-100 shadow-sm transition-colors">
+                <i data-lucide="settings" class="w-3 h-3 mr-1"></i> Pengaturan & Data Admin
+            </button>
         </div>
 
-        <!-- BAGIAN 2: INFO EVENT -->
-        <div class="p-6 sm:p-8">
-            <div class="text-center mb-8">
-                <!-- Ubah Nama dan Detail Event di Sini -->
-                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Pernikahan & Resepsi</h1>
-                <h2 class="text-lg text-slate-600 mb-4 font-serif italic">Romeo & Juliet</h2>
-                
-                <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div class="flex items-center">
-                        <i data-lucide="calendar-check" class="w-4 h-4 mr-2 text-indigo-500"></i>
-                        <span>Sabtu, 24 Agustus 2026</span>
-                    </div>
-                    <div class="hidden sm:block text-slate-300">•</div>
-                    <div class="flex items-center">
-                        <i data-lucide="clock" class="w-4 h-4 mr-2 text-indigo-500"></i>
-                        <span>10:00 WIB</span>
-                    </div>
-                </div>
-                <div class="mt-3 text-sm text-slate-500 flex justify-center items-center">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-1 text-slate-400"></i> Jakarta Utara, Indonesia
-                </div>
+        <div class="max-w-lg w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+            
+            <!-- Banner Event -->
+            <div class="h-56 sm:h-64 bg-slate-200 relative group">
+                <img id="displayBanner" src="" alt="Banner Event" class="w-full h-full object-cover"/>
             </div>
 
-            <hr class="border-slate-100 mb-8" />
+            <!-- Info Event -->
+            <div class="p-6 sm:p-8">
+                <div class="text-center mb-8">
+                    <h1 id="displayTitle" class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Memuat...</h1>
+                    <h2 id="displaySubtitle" class="text-lg text-slate-600 mb-4 font-serif italic">-</h2>
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="flex items-center">
+                            <i data-lucide="calendar-check" class="w-4 h-4 mr-2 text-indigo-500"></i>
+                            <span id="displayDate">-</span>
+                        </div>
+                        <div class="hidden sm:block text-slate-300">•</div>
+                        <div class="flex items-center">
+                            <i data-lucide="clock" class="w-4 h-4 mr-2 text-indigo-500"></i>
+                            <span id="displayTime">-</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-sm text-slate-500 flex justify-center items-center">
+                        <i data-lucide="map-pin" class="w-4 h-4 mr-1 text-slate-400"></i> 
+                        <span id="displayLocation">-</span>
+                    </div>
+                </div>
 
-            <!-- BAGIAN 3: FORMULIR -->
-            <div id="formContainer">
-                <h3 class="text-lg font-semibold text-slate-800 mb-1">Konfirmasi Kehadiran</h3>
-                <p class="text-sm text-slate-500 mb-4">Mohon isi form di bawah ini untuk kehadiran Anda.</p>
+                <hr class="border-slate-100 mb-8" />
 
-                <form id="rsvpForm" class="space-y-6">
-                    <!-- Nama Lengkap -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i data-lucide="user" class="h-5 w-5 text-slate-400"></i>
+                <!-- Formulir RSVP -->
+                <div id="formContainer">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-1">Konfirmasi Kehadiran</h3>
+                    <p class="text-sm text-slate-500 mb-4">Mohon isi form di bawah ini sebelum acara dimulai.</p>
+
+                    <form id="rsvpForm" class="space-y-6">
+                        <!-- Input tersembunyi untuk Judul Event -->
+                        <input type="hidden" name="eventName" id="formEventName" value="">
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i data-lucide="user" class="h-5 w-5 text-slate-400"></i>
+                                </div>
+                                <input type="text" name="name" required class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white" placeholder="Masukkan nama Anda">
                             </div>
-                            <input type="text" name="name" required class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white" placeholder="Masukkan nama Anda">
                         </div>
-                    </div>
 
-                    <!-- Status Hadir -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-3">Apakah Anda akan hadir?</label>
-                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                            <label class="flex-1 flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all border-slate-200 hover:bg-slate-50" id="labelHadir">
-                                <input type="radio" name="status" value="hadir" required class="sr-only" onchange="toggleGuestSelect()">
-                                <span class="font-medium text-slate-600" id="textHadir">Ya, Hadir</span>
-                            </label>
-                            <label class="flex-1 flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all border-slate-200 hover:bg-slate-50" id="labelTidak">
-                                <input type="radio" name="status" value="tidak" required class="sr-only" onchange="toggleGuestSelect()">
-                                <span class="font-medium text-slate-600" id="textTidak">Tidak Bisa</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Jumlah Tamu (Awalnya Sembunyi) -->
-                    <div id="guestSelectDiv" class="hidden transition-all duration-300">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Jumlah Orang</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i data-lucide="users" class="h-5 w-5 text-slate-400"></i>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-3">Apakah Anda akan hadir?</label>
+                            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                                <label class="flex-1 flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm" id="labelHadir">
+                                    <input type="radio" name="status" value="hadir" checked required class="sr-only" onchange="toggleGuestSelect()">
+                                    <span class="font-medium" id="textHadir">Ya, Hadir</span>
+                                </label>
+                                <label class="flex-1 flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all border-slate-200 hover:bg-slate-50 text-slate-600" id="labelTidak">
+                                    <input type="radio" name="status" value="tidak" required class="sr-only" onchange="toggleGuestSelect()">
+                                    <span class="font-medium" id="textTidak">Tidak Bisa</span>
+                                </label>
                             </div>
-                            <select name="guests" id="guests" class="block w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white appearance-none">
-                                <option value="1">1 Orang (Hanya Saya)</option>
-                                <option value="2">2 Orang</option>
-                                <option value="3">3 Orang</option>
-                                <option value="4">4 Orang</option>
-                            </select>
                         </div>
-                    </div>
 
-                    <!-- Pesan -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Pesan / Doa (Opsional)</label>
-                        <textarea name="message" rows="3" class="block w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white resize-none" placeholder="Tuliskan pesan..."></textarea>
-                    </div>
+                        <div id="guestSelectDiv" class="transition-all duration-300">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Jumlah Orang</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i data-lucide="users" class="h-5 w-5 text-slate-400"></i>
+                                </div>
+                                <select name="guests" id="guests" class="block w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white appearance-none">
+                                    <option value="1">1 Orang (Hanya Saya)</option>
+                                    <option value="2">2 Orang</option>
+                                    <option value="3">3 Orang</option>
+                                    <option value="4">4 Orang</option>
+                                    <option value="5">5 Orang</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <!-- Tombol Submit -->
-                    <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white font-semibold py-4 px-4 rounded-xl hover:bg-slate-800 transition-colors shadow-md mt-4 flex justify-center items-center">
-                        <span id="btnText">Kirim Konfirmasi</span>
-                        <div id="btnLoader" class="loader ml-2 hidden"></div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Pesan / Doa (Opsional)</label>
+                            <textarea name="message" rows="3" class="block w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white resize-none" placeholder="Tuliskan pesan..."></textarea>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white font-semibold py-4 px-4 rounded-xl hover:bg-slate-800 transition-colors shadow-md mt-4 flex justify-center items-center">
+                            <span id="btnText">Kirim Konfirmasi</span>
+                            <div id="btnLoader" class="loader ml-2 hidden"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Pesan Sukses -->
+                <div id="successMessage" class="hidden py-8 text-center">
+                    <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-emerald-100 mb-6">
+                        <i data-lucide="check-circle" class="h-10 w-10 text-emerald-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Terima Kasih!</h2>
+                    <p class="text-slate-600 mb-6">Konfirmasi kehadiran Anda telah berhasil disimpan.</p>
+                    <button onclick="resetForm()" class="px-6 py-2.5 border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50">
+                        Isi form lagi
                     </button>
-                </form>
-            </div>
-
-            <!-- BAGIAN 4: PESAN SUKSES (Awalnya Sembunyi) -->
-            <div id="successMessage" class="hidden py-8 text-center">
-                <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-emerald-100 mb-6">
-                    <i data-lucide="check-circle" class="h-10 w-10 text-emerald-600"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2">Terima Kasih!</h2>
-                <p class="text-slate-600 mb-6">Konfirmasi kehadiran Anda telah berhasil kami terima.</p>
-            </div>
 
+            </div>
         </div>
     </div>
 
-    <script>
-        // Inisialisasi Ikon
-        lucide.createIcons();
-
-        // Logika untuk menampilkan opsi jumlah tamu berdasarkan pilihan hadir/tidak
-        const labelHadir = document.getElementById('labelHadir');
-        const textHadir = document.getElementById('textHadir');
-        const labelTidak = document.getElementById('labelTidak');
-        const textTidak = document.getElementById('textTidak');
-        const guestSelectDiv = document.getElementById('guestSelectDiv');
-        const guestsInput = document.getElementById('guests');
-
-        function toggleGuestSelect() {
-            const status = document.querySelector('input[name="status"]:checked').value;
+    <!-- ========================================== -->
+    <!-- TAMPILAN ADMIN (DASHBOARD)                 -->
+    <!-- ========================================== -->
+    <div id="adminView" class="hidden min-h-screen bg-slate-100 p-4 sm:p-8">
+        <div class="max-w-5xl mx-auto space-y-6">
             
-            if (status === 'hadir') {
-                guestSelectDiv.classList.remove('hidden');
+            <!-- Header Admin -->
+            <div class="flex flex-col sm:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm no-print">
+                <button onclick="toggleView('guest')" class="flex items-center text-slate-600 hover:text-slate-900 mb-4 sm:mb-0 transition-colors">
+                    <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i> Lihat Preview Web
+                </button>
+                <h1 class="text-2xl font-bold text-slate-800">Admin Dashboard</h1>
+                <button onclick="window.print()" class="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-sm transition-colors">
+                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak PDF / Print
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Panel Pengaturan Event -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm md:col-span-1 no-print">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="settings" class="w-5 h-5 mr-2 text-indigo-500"></i> Pengaturan Event
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Judul Event</label>
+                            <input type="text" id="adminTitle" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveConfig()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nama Pasangan / Sub-judul</label>
+                            <input type="text" id="adminSubtitle" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveConfig()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tanggal</label>
+                            <input type="date" id="adminDate" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveConfig()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Waktu</label>
+                            <input type="time" id="adminTime" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveConfig()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Lokasi</label>
+                            <input type="text" id="adminLocation" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveConfig()">
+                        </div>
+                        <div class="pt-2">
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Link Banner / Foto (URL)</label>
+                            <input type="url" id="adminBanner" class="w-full p-2 text-sm border rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://i.imgur.com/xxx.jpg" oninput="saveConfig()">
+                            <p class="text-xs text-slate-400 mt-1">Pastikan link berakhiran .jpg / .png (contoh dari Imgur)</p>
+                        </div>
+                    </div>
+
+                    <!-- Area Copy Link Publik -->
+                    <div class="mt-8 pt-6 border-t border-slate-100 bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                        <h2 class="text-md font-bold text-slate-800 mb-2 flex items-center">
+                            <i data-lucide="link" class="w-4 h-4 mr-2 text-indigo-600"></i> Magic Link RSVP
+                        </h2>
+                        <p class="text-xs text-slate-600 mb-3">Link di bawah ini sudah merekam otomatis teks & foto yang Anda ketik di atas. <b>Bagikan link ini ke tamu Anda!</b></p>
+                        <div class="flex flex-col gap-2">
+                            <textarea id="guestLinkInput" readOnly class="w-full p-2 text-xs border border-indigo-200 rounded-lg bg-white text-slate-600 outline-none resize-none" rows="3"></textarea>
+                            <button onclick="copyGuestLink()" id="copyBtn" class="flex justify-center items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">
+                                <i data-lucide="copy" class="w-4 h-4 mr-2" id="copyIcon"></i> <span id="copyText">Salin Link & Bagikan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Database Tamu -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm md:col-span-2">
+                    
+                    <div class="hidden print:block mb-6 text-center">
+                        <h1 class="text-2xl font-bold" id="printTitle">Laporan Kehadiran</h1>
+                        <hr class="my-4 border-black" />
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 no-print gap-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                            <i data-lucide="list" class="w-5 h-5 mr-2 text-indigo-500"></i> Database RSVP Lokal
+                        </h2>
+                        <!-- Filter Dropdown Event -->
+                        <div class="flex items-center space-x-3 w-full sm:w-auto">
+                            <select id="eventFilter" onchange="renderTable()" class="w-full sm:w-auto p-2 text-sm border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="all">Semua Event</option>
+                            </select>
+                            <span id="totalDataCount" class="text-sm font-normal text-slate-500 whitespace-nowrap">0 Data</span>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse print-table">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-sm">
+                                    <th class="p-3 font-semibold text-slate-700">Tanggal Isi</th>
+                                    <th class="p-3 font-semibold text-slate-700">Acara</th>
+                                    <th class="p-3 font-semibold text-slate-700">Nama Lengkap</th>
+                                    <th class="p-3 font-semibold text-slate-700">Status</th>
+                                    <th class="p-3 font-semibold text-slate-700">Jml Tamu</th>
+                                    <th class="p-3 font-semibold text-slate-700">Pesan/Doa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guestTableBody">
+                                <!-- Data tamu akan muncul di sini via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-8 text-right bg-slate-50 p-4 rounded-xl print:bg-white print:p-0">
+                        <p class="text-slate-700">Total Konfirmasi <strong>Hadir</strong>: <span id="totalHadir" class="font-bold text-indigo-600">0</span> Orang</p>
+                        <p class="text-slate-700 mt-1">Total Konfirmasi <strong>Tidak Hadir</strong>: <span id="totalTidak" class="font-bold text-rose-600">0</span> Data</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIKA -->
+    <script>
+        // URL GOOGLE APPS SCRIPT YANG BARU DITAMBAHKAN
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx98xn6DTCHIaApb5SGlN0vGa5eaSu2D9DNYWsqGGHc2sZi3Hgev42EV341KN8D5hA8XQ/exec';
+
+        // Event Config (Membaca dari Link URL -> Local Storage -> Default Bawaan)
+        let eventConfig = {};
+        let rsvpData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // 1. Cek parameter URL (Ini yang bikin Magic Link bekerja!)
+            const params = new URLSearchParams(window.location.search);
+            const isGuest = params.get('role') === 'guest';
+
+            if (isGuest) {
+                // Sembunyikan tombol admin jika ini tamu
+                document.getElementById('adminAccessBtn').classList.add('hidden');
                 
-                // Ubah gaya tombol hadir jadi aktif
-                labelHadir.classList.add('border-indigo-500', 'bg-indigo-50');
-                textHadir.classList.add('text-indigo-700');
-                // Reset tombol tidak
-                labelTidak.classList.remove('border-rose-500', 'bg-rose-50');
-                textTidak.classList.remove('text-rose-700');
+                // Ambil data langsung dari link URL
+                eventConfig = {
+                    title: params.get('t') || 'Pernikahan & Resepsi',
+                    subtitle: params.get('s') || 'Nama Pasangan',
+                    date: params.get('d') || '2026-08-24',
+                    time: params.get('tm') || '10:00',
+                    location: params.get('l') || 'Jakarta',
+                    bannerUrl: params.get('b') || 'https://i.imgur.com/AgOgGvv.jpeg'
+                };
             } else {
-                guestSelectDiv.classList.add('hidden');
-                guestsInput.value = "0";
-                
-                // Ubah gaya tombol tidak jadi aktif
-                labelTidak.classList.add('border-rose-500', 'bg-rose-50');
-                textTidak.classList.add('text-rose-700');
-                // Reset tombol hadir
-                labelHadir.classList.remove('border-indigo-500', 'bg-indigo-50');
-                textHadir.classList.remove('text-indigo-700');
+                // Jika Admin, ambil dari Local Storage komputer admin
+                const savedConfig = localStorage.getItem('rsvpAppConfig');
+                if (savedConfig) {
+                    eventConfig = JSON.parse(savedConfig);
+                } else {
+                    // Default pertama kali buka
+                    eventConfig = {
+                        title: 'Pernikahan & Resepsi',
+                        subtitle: 'Romeo & Juliet',
+                        date: '2026-08-24',
+                        time: '10:00',
+                        location: 'Jakarta Utara, Indonesia',
+                        bannerUrl: 'https://i.imgur.com/AgOgGvv.jpeg' // Link Imgur Anda saya buat otomatis!
+                    };
+                }
+            }
+
+            // Muat RSVP Database lokal
+            const savedRsvp = localStorage.getItem('rsvpAppData');
+            if (savedRsvp) rsvpData = JSON.parse(savedRsvp);
+
+            // Isi form admin dengan data yang ada
+            document.getElementById('adminTitle').value = eventConfig.title;
+            document.getElementById('adminSubtitle').value = eventConfig.subtitle;
+            document.getElementById('adminDate').value = eventConfig.date;
+            document.getElementById('adminTime').value = eventConfig.time;
+            document.getElementById('adminLocation').value = eventConfig.location;
+            document.getElementById('adminBanner').value = eventConfig.bannerUrl;
+
+            applyConfigToDOM();
+            updateMagicLink();
+            renderTable();
+        });
+
+        // Simpan setiap ketikan di Admin Panel
+        function saveConfig() {
+            eventConfig.title = document.getElementById('adminTitle').value;
+            eventConfig.subtitle = document.getElementById('adminSubtitle').value;
+            eventConfig.date = document.getElementById('adminDate').value;
+            eventConfig.time = document.getElementById('adminTime').value;
+            eventConfig.location = document.getElementById('adminLocation').value;
+            eventConfig.bannerUrl = document.getElementById('adminBanner').value;
+            
+            // Simpan ke komputer admin
+            localStorage.setItem('rsvpAppConfig', JSON.stringify(eventConfig));
+            
+            applyConfigToDOM();
+            updateMagicLink(); // Langsung perbarui link setiap admin mengetik
+        }
+
+        // Bikin Magic Link yang membungkus semua text & foto
+        function updateMagicLink() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const p = new URLSearchParams();
+            p.set('role', 'guest');
+            if(eventConfig.title) p.set('t', eventConfig.title);
+            if(eventConfig.subtitle) p.set('s', eventConfig.subtitle);
+            if(eventConfig.date) p.set('d', eventConfig.date);
+            if(eventConfig.time) p.set('tm', eventConfig.time);
+            if(eventConfig.location) p.set('l', eventConfig.location);
+            if(eventConfig.bannerUrl) p.set('b', eventConfig.bannerUrl);
+            
+            document.getElementById('guestLinkInput').value = `${baseUrl}?${p.toString()}`;
+        }
+
+        // Terapkan text dan gambar ke halaman depan
+        function applyConfigToDOM() {
+            let formattedDate = eventConfig.date;
+            if (eventConfig.date) {
+                const d = new Date(eventConfig.date);
+                if (!isNaN(d)) formattedDate = d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            document.getElementById('displayTitle').innerText = eventConfig.title;
+            document.getElementById('displaySubtitle').innerText = eventConfig.subtitle;
+            document.getElementById('displayDate').innerText = formattedDate;
+            document.getElementById('displayTime').innerText = eventConfig.time + ' WIB';
+            document.getElementById('displayLocation').innerText = eventConfig.location;
+            
+            // Set hidden input agar dikirim ke Google Sheets
+            document.getElementById('formEventName').value = eventConfig.title;
+            
+            // Load Gambar (Kasih fallback jika kosong)
+            const imgEl = document.getElementById('displayBanner');
+            imgEl.src = eventConfig.bannerUrl || 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80';
+            
+            document.getElementById('printTitle').innerText = "Laporan Kehadiran - " + eventConfig.title;
+        }
+
+        function toggleView(view) {
+            if (view === 'admin') {
+                document.getElementById('guestView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+            } else {
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('guestView').classList.remove('hidden');
             }
         }
 
-        // ====== GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA ======
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxj_YyifT2XawqRKPBuOC2ALkQxzd3qVgVRaVbcr9sMS_K7v7tidpISMUIJegJqRno_QA/exec';
-        // =======================================================================
+        // Logic Radio Button Hadir/Tidak
+        function toggleGuestSelect() {
+            const status = document.querySelector('input[name="status"]:checked').value;
+            const guestSelectDiv = document.getElementById('guestSelectDiv');
+            const guestsInput = document.getElementById('guests');
+            const labelHadir = document.getElementById('labelHadir');
+            const textHadir = document.getElementById('textHadir');
+            const labelTidak = document.getElementById('labelTidak');
+            const textTidak = document.getElementById('textTidak');
+            
+            if (status === 'hadir') {
+                guestSelectDiv.classList.remove('hidden');
+                labelHadir.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+                labelHadir.classList.remove('border-slate-200', 'text-slate-600');
+                
+                labelTidak.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-700');
+                labelTidak.classList.add('border-slate-200', 'text-slate-600');
+            } else {
+                guestSelectDiv.classList.add('hidden');
+                guestsInput.value = "1";
+                
+                labelTidak.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-700');
+                labelTidak.classList.remove('border-slate-200', 'text-slate-600');
+                
+                labelHadir.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+                labelHadir.classList.add('border-slate-200', 'text-slate-600');
+            }
+        }
 
+        // Fungsi Baru: Update opsi filter acara dari data yang masuk
+        function updateEventFilterOptions() {
+            const filterSelect = document.getElementById('eventFilter');
+            const currentValue = filterSelect.value;
+            
+            // Ambil nama acara yang unik dari database
+            const uniqueEvents = [...new Set(rsvpData.map(item => item.eventName || 'Event Lama'))];
+            
+            filterSelect.innerHTML = '<option value="all">Semua Event</option>';
+            uniqueEvents.forEach(evt => {
+                const option = document.createElement('option');
+                option.value = evt;
+                option.textContent = evt;
+                filterSelect.appendChild(option);
+            });
+            
+            // Pertahankan pilihan filter sebelumnya jika ada
+            if (uniqueEvents.includes(currentValue) || currentValue === 'all') {
+                filterSelect.value = currentValue;
+            } else {
+                filterSelect.value = 'all';
+            }
+        }
+
+        // Tampilkan Tabel
+        function renderTable() {
+            updateEventFilterOptions(); // Perbarui dropdown sebelum render
+            
+            const tbody = document.getElementById('guestTableBody');
+            const filterValue = document.getElementById('eventFilter').value;
+            tbody.innerHTML = '';
+            
+            let hadirCount = 0, tidakCount = 0;
+
+            // Filter data berdasarkan dropdown
+            let filteredData = rsvpData;
+            if (filterValue !== 'all') {
+                filteredData = rsvpData.filter(item => (item.eventName || 'Event Lama') === filterValue);
+            }
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400 text-sm">Belum ada data RSVP masuk.</td></tr>';
+            } else {
+                filteredData.forEach(item => {
+                    if(item.status === 'hadir') hadirCount += parseInt(item.guests);
+                    if(item.status === 'tidak') tidakCount++;
+
+                    const statusBadge = item.status === 'hadir' 
+                        ? '<span class="px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Hadir</span>'
+                        : '<span class="px-2 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-700">Tidak Hadir</span>';
+                        
+                    // Tangani data lama yang belum punya judul event
+                    const evtName = item.eventName || 'Event Lama';
+
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-100 text-sm">
+                            <td class="p-3 text-slate-500">${item.timestamp}</td>
+                            <td class="p-3 text-slate-700 font-medium truncate max-w-[120px]" title="${evtName}">${evtName}</td>
+                            <td class="p-3 font-medium text-slate-800">${item.name}</td>
+                            <td class="p-3">${statusBadge}</td>
+                            <td class="p-3 text-slate-600">${item.status === 'hadir' ? item.guests + ' Orang' : '-'}</td>
+                            <td class="p-3 text-slate-600 max-w-xs truncate">${item.message || '-'}</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('totalDataCount').innerText = `${filteredData.length} Data`;
+            document.getElementById('totalHadir').innerText = hadirCount;
+            document.getElementById('totalTidak').innerText = tidakCount;
+        }
+
+        // Menggunakan Fallback Copy karena API Clipboard sering di-block di Iframe/Preview
+        function copyGuestLink() {
+            const linkInput = document.getElementById('guestLinkInput');
+            const link = linkInput.value;
+            const copyBtn = document.getElementById('copyBtn');
+            const copyText = document.getElementById('copyText');
+            
+            const handleSuccess = () => {
+                copyBtn.classList.replace('bg-indigo-600', 'bg-emerald-500');
+                copyBtn.classList.replace('hover:bg-indigo-700', 'hover:bg-emerald-600');
+                copyText.innerText = "Berhasil Disalin!";
+                
+                setTimeout(() => {
+                    copyBtn.classList.replace('bg-emerald-500', 'bg-indigo-600');
+                    copyBtn.classList.replace('hover:bg-emerald-600', 'hover:bg-indigo-700');
+                    copyText.innerText = "Salin Link & Bagikan";
+                }, 2000);
+            };
+
+            const fallbackCopy = () => {
+                linkInput.select();
+                linkInput.setSelectionRange(0, 99999); // Untuk perangkat mobile
+                try {
+                    document.execCommand('copy');
+                    handleSuccess();
+                } catch (err) {
+                    console.error('Gagal menyalin text (fallback)', err);
+                    alert("Gagal otomatis menyalin link. Silakan pilih dan copy link secara manual dari kotak teks.");
+                }
+                window.getSelection().removeAllRanges(); // Bersihkan selection
+            };
+
+            // Coba API modern dulu, kalau gagal (NotAllowedError) gunakan fallback
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(link)
+                    .then(handleSuccess)
+                    .catch((err) => {
+                        console.warn("Clipboard API gagal, mencoba fallback...", err);
+                        fallbackCopy();
+                    });
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        // ==========================================
+        // SUBMIT FORM RSVP
+        // ==========================================
         const form = document.getElementById('rsvpForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const btnLoader = document.getElementById('btnLoader');
-        const formContainer = document.getElementById('formContainer');
-        const successMessage = document.getElementById('successMessage');
-
         form.addEventListener('submit', e => {
             e.preventDefault();
             
-            // Ubah tombol jadi mode loading
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            
             submitBtn.disabled = true;
             btnText.innerText = "Mengirim...";
             btnLoader.classList.remove('hidden');
 
             const formData = new FormData(form);
+            const statusVal = formData.get('status');
+            const newEntry = {
+                timestamp: new Date().toLocaleString('id-ID'),
+                eventName: eventConfig.title, // Tambahkan Judul Event ke Data Lokal
+                name: formData.get('name'),
+                status: statusVal,
+                guests: statusVal === 'hadir' ? formData.get('guests') : '0',
+                message: formData.get('message')
+            };
+
+            // Simpan lokal
+            rsvpData.unshift(newEntry);
+            localStorage.setItem('rsvpAppData', JSON.stringify(rsvpData));
+            renderTable();
 
             // Kirim ke Google Sheets
-            fetch(GOOGLE_SCRIPT_URL, { 
-                method: 'POST', 
-                body: formData,
-                mode: 'no-cors' // Penting agar tidak kena error CORS dari browser
-            })
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' })
             .then(() => {
-                // Tampilkan pesan sukses
-                formContainer.classList.add('hidden');
-                successMessage.classList.remove('hidden');
+                document.getElementById('formContainer').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
             })
             .catch(error => {
-                console.error('Error!', error.message);
-                alert("Maaf, terjadi kesalahan. Silakan coba lagi.");
-                
-                // Kembalikan tombol ke semula
+                console.error('Error!', error);
+                alert("Tersimpan di database lokal, tapi gagal ke Google Sheets.");
+                document.getElementById('formContainer').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
+            })
+            .finally(() => {
                 submitBtn.disabled = false;
                 btnText.innerText = "Kirim Konfirmasi";
                 btnLoader.classList.add('hidden');
             });
         });
+
+        function resetForm() {
+            form.reset();
+            toggleGuestSelect();
+            document.getElementById('successMessage').classList.add('hidden');
+            document.getElementById('formContainer').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
