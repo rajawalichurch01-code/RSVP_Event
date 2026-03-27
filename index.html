@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP Event Konfirmasi</title>
+    <!-- Tailwind CSS (Tanpa install, langsung via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Animasi loading sederhana */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #4f46e5;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center py-8 px-4">
+
+    <div class="max-w-lg w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+        
+        <!-- BAGIAN 1: BANNER EVENT -->
+        <!-- Ganti src URL di bawah dengan link gambar banner Anda jika ada -->
+        <div class="h-56 sm:h-64 bg-slate-200 relative">
+            <img 
+                src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                alt="Banner Event" 
+                class="w-full h-full object-cover"
+            />
+        </div>
+
+        <!-- BAGIAN 2: INFO EVENT -->
+        <div class="p-6 sm:p-8">
+            <div class="text-center mb-8">
+                <!-- Ubah Nama dan Detail Event di Sini -->
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Pernikahan & Resepsi</h1>
+                <h2 class="text-lg text-slate-600 mb-4 font-serif italic">Romeo & Juliet</h2>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div class="flex items-center">
+                        <i data-lucide="calendar-check" class="w-4 h-4 mr-2 text-indigo-500"></i>
+                        <span>Sabtu, 24 Agustus 2026</span>
+                    </div>
+                    <div class="hidden sm:block text-slate-300">•</div>
+                    <div class="flex items-center">
+                        <i data-lucide="clock" class="w-4 h-4 mr-2 text-indigo-500"></i>
+                        <span>10:00 WIB</span>
+                    </div>
+                </div>
+                <div class="mt-3 text-sm text-slate-500 flex justify-center items-center">
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-1 text-slate-400"></i> Jakarta Utara, Indonesia
+                </div>
+            </div>
+
+            <hr class="border-slate-100 mb-8" />
+
+            <!-- BAGIAN 3: FORMULIR -->
+            <div id="formContainer">
+                <h3 class="text-lg font-semibold text-slate-800 mb-1">Konfirmasi Kehadiran</h3>
+                <p class="text-sm text-slate-500 mb-4">Mohon isi form di bawah ini untuk kehadiran Anda.</p>
+
+                <form id="rsvpForm" class="space-y-6">
+                    <!-- Nama Lengkap -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="user" class="h-5 w-5 text-slate-400"></i>
+                            </div>
+                            <input type="text" name="name" required class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white" placeholder="Masukkan nama Anda">
+                        </div>
+                    </div>
+
+                    <!-- Status Hadir -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-3">Apakah Anda akan hadir?</label>
+                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                            <label class="flex-1 flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all border-slate-200 hover:bg-slate-50" id="labelHadir">
+                                <input type="radio" name="status" value="hadir" required class="sr-only" onchange="toggleGuestSelect()">
+                                <span class="font-medium text-slate-600" id="textHadir">Ya, Hadir</span>
+                            </label>
+                            <label class="flex-1 flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all border-slate-200 hover:bg-slate-50" id="labelTidak">
+                                <input type="radio" name="status" value="tidak" required class="sr-only" onchange="toggleGuestSelect()">
+                                <span class="font-medium text-slate-600" id="textTidak">Tidak Bisa</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Jumlah Tamu (Awalnya Sembunyi) -->
+                    <div id="guestSelectDiv" class="hidden transition-all duration-300">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Jumlah Orang</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="users" class="h-5 w-5 text-slate-400"></i>
+                            </div>
+                            <select name="guests" id="guests" class="block w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white appearance-none">
+                                <option value="1">1 Orang (Hanya Saya)</option>
+                                <option value="2">2 Orang</option>
+                                <option value="3">3 Orang</option>
+                                <option value="4">4 Orang</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Pesan -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Pesan / Doa (Opsional)</label>
+                        <textarea name="message" rows="3" class="block w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white resize-none" placeholder="Tuliskan pesan..."></textarea>
+                    </div>
+
+                    <!-- Tombol Submit -->
+                    <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white font-semibold py-4 px-4 rounded-xl hover:bg-slate-800 transition-colors shadow-md mt-4 flex justify-center items-center">
+                        <span id="btnText">Kirim Konfirmasi</span>
+                        <div id="btnLoader" class="loader ml-2 hidden"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- BAGIAN 4: PESAN SUKSES (Awalnya Sembunyi) -->
+            <div id="successMessage" class="hidden py-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-emerald-100 mb-6">
+                    <i data-lucide="check-circle" class="h-10 w-10 text-emerald-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Terima Kasih!</h2>
+                <p class="text-slate-600 mb-6">Konfirmasi kehadiran Anda telah berhasil kami terima.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi Ikon
+        lucide.createIcons();
+
+        // Logika untuk menampilkan opsi jumlah tamu berdasarkan pilihan hadir/tidak
+        const labelHadir = document.getElementById('labelHadir');
+        const textHadir = document.getElementById('textHadir');
+        const labelTidak = document.getElementById('labelTidak');
+        const textTidak = document.getElementById('textTidak');
+        const guestSelectDiv = document.getElementById('guestSelectDiv');
+        const guestsInput = document.getElementById('guests');
+
+        function toggleGuestSelect() {
+            const status = document.querySelector('input[name="status"]:checked').value;
+            
+            if (status === 'hadir') {
+                guestSelectDiv.classList.remove('hidden');
+                
+                // Ubah gaya tombol hadir jadi aktif
+                labelHadir.classList.add('border-indigo-500', 'bg-indigo-50');
+                textHadir.classList.add('text-indigo-700');
+                // Reset tombol tidak
+                labelTidak.classList.remove('border-rose-500', 'bg-rose-50');
+                textTidak.classList.remove('text-rose-700');
+            } else {
+                guestSelectDiv.classList.add('hidden');
+                guestsInput.value = "0";
+                
+                // Ubah gaya tombol tidak jadi aktif
+                labelTidak.classList.add('border-rose-500', 'bg-rose-50');
+                textTidak.classList.add('text-rose-700');
+                // Reset tombol hadir
+                labelHadir.classList.remove('border-indigo-500', 'bg-indigo-50');
+                textHadir.classList.remove('text-indigo-700');
+            }
+        }
+
+        // ====== GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA ======
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxj_YyifT2XawqRKPBuOC2ALkQxzd3qVgVRaVbcr9sMS_K7v7tidpISMUIJegJqRno_QA/exec';
+        // =======================================================================
+
+        const form = document.getElementById('rsvpForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const formContainer = document.getElementById('formContainer');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            
+            // Ubah tombol jadi mode loading
+            submitBtn.disabled = true;
+            btnText.innerText = "Mengirim...";
+            btnLoader.classList.remove('hidden');
+
+            const formData = new FormData(form);
+
+            // Kirim ke Google Sheets
+            fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                body: formData,
+                mode: 'no-cors' // Penting agar tidak kena error CORS dari browser
+            })
+            .then(() => {
+                // Tampilkan pesan sukses
+                formContainer.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert("Maaf, terjadi kesalahan. Silakan coba lagi.");
+                
+                // Kembalikan tombol ke semula
+                submitBtn.disabled = false;
+                btnText.innerText = "Kirim Konfirmasi";
+                btnLoader.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
