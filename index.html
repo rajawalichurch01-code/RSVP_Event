@@ -248,6 +248,8 @@
                                     <th class="p-3 font-semibold text-slate-700">Status</th>
                                     <th class="p-3 font-semibold text-slate-700">Jml Tamu</th>
                                     <th class="p-3 font-semibold text-slate-700">Pesan/Doa</th>
+                                    <!-- Header Aksi Khusus Admin -->
+                                    <th class="p-3 font-semibold text-slate-700 text-center no-print">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="guestTableBody">
@@ -465,9 +467,12 @@
             }
 
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400 text-sm">Belum ada data RSVP masuk.</td></tr>';
+                // Diperbarui colspan menjadi 7 untuk menyertakan kolom Aksi
+                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400 text-sm">Belum ada data RSVP masuk.</td></tr>';
             } else {
                 filteredData.forEach(item => {
+                    const originalIndex = rsvpData.indexOf(item); // Mendapatkan urutan data asli untuk fitur Hapus
+                    
                     if(item.status === 'hadir') hadirCount += parseInt(item.guests);
                     if(item.status === 'tidak') tidakCount++;
 
@@ -486,6 +491,11 @@
                             <td class="p-3">${statusBadge}</td>
                             <td class="p-3 text-slate-600">${item.status === 'hadir' ? item.guests + ' Orang' : '-'}</td>
                             <td class="p-3 text-slate-600 max-w-xs truncate">${item.message || '-'}</td>
+                            <td class="p-3 text-center no-print">
+                                <button onclick="deleteEntry(${originalIndex})" class="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors" title="Hapus Data">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -493,6 +503,24 @@
             document.getElementById('totalDataCount').innerText = `${filteredData.length} Data`;
             document.getElementById('totalHadir').innerText = hadirCount;
             document.getElementById('totalTidak').innerText = tidakCount;
+            
+            // Render ulang ikon untuk elemen-elemen baru (termasuk ikon tong sampah)
+            lucide.createIcons();
+        }
+
+        // FUNGSI BARU: Hapus Data
+        function deleteEntry(index) {
+            // Konfirmasi sebelum menghapus
+            if (confirm('Apakah Anda yakin ingin menghapus data tamu ini? (Catatan: Ini hanya akan menghapus data di layar lokal Anda, bukan dari Google Sheets)')) {
+                // Hapus 1 item berdasarkan indeksnya
+                rsvpData.splice(index, 1);
+                
+                // Simpan perubahan ke Local Storage
+                localStorage.setItem('rsvpAppData', JSON.stringify(rsvpData));
+                
+                // Refresh ulang tampilan tabel
+                renderTable();
+            }
         }
 
         // Menggunakan Fallback Copy karena API Clipboard sering di-block di Iframe/Preview
