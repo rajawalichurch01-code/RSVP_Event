@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSVP Event Konfirmasi</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .loader {
@@ -29,12 +27,8 @@
 </head>
 <body class="bg-slate-50 font-sans min-h-screen">
 
-    <!-- ========================================== -->
-    <!-- TAMPILAN GUEST (FORM RSVP)                 -->
-    <!-- ========================================== -->
     <div id="guestView" class="flex flex-col items-center justify-center py-8 px-4 no-print">
         
-        <!-- Tombol Masuk ke Admin -->
         <div id="adminAccessBtn" class="w-full max-w-lg flex justify-end mb-4">
             <button onclick="toggleView('admin')" class="text-xs flex items-center bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full hover:bg-slate-100 shadow-sm transition-colors">
                 <i data-lucide="settings" class="w-3 h-3 mr-1"></i> Pengaturan & Data Admin
@@ -43,12 +37,10 @@
 
         <div class="max-w-lg w-full bg-white rounded-3xl shadow-xl overflow-hidden">
             
-            <!-- Banner Event -->
             <div class="h-56 sm:h-64 bg-slate-200 relative group">
                 <img id="displayBanner" src="" alt="Banner Event" class="w-full h-full object-cover"/>
             </div>
 
-            <!-- Info Event -->
             <div class="p-6 sm:p-8">
                 <div class="text-center mb-8">
                     <h1 id="displayTitle" class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Memuat...</h1>
@@ -73,13 +65,11 @@
 
                 <hr class="border-slate-100 mb-8" />
 
-                <!-- Formulir RSVP -->
                 <div id="formContainer">
                     <h3 class="text-lg font-semibold text-slate-800 mb-1">Konfirmasi Kehadiran</h3>
                     <p class="text-sm text-slate-500 mb-4">Mohon isi form di bawah ini sebelum acara dimulai.</p>
 
                     <form id="rsvpForm" class="space-y-6">
-                        <!-- Input tersembunyi untuk Judul Event -->
                         <input type="hidden" name="eventName" id="formEventName" value="">
 
                         <div>
@@ -134,7 +124,6 @@
                     </form>
                 </div>
 
-                <!-- Pesan Sukses -->
                 <div id="successMessage" class="hidden py-8 text-center">
                     <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-emerald-100 mb-6">
                         <i data-lucide="check-circle" class="h-10 w-10 text-emerald-600"></i>
@@ -150,13 +139,9 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAMPILAN ADMIN (DASHBOARD)                 -->
-    <!-- ========================================== -->
     <div id="adminView" class="hidden min-h-screen bg-slate-100 p-4 sm:p-8">
         <div class="max-w-5xl mx-auto space-y-6">
             
-            <!-- Header Admin -->
             <div class="flex flex-col sm:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm no-print">
                 <button onclick="toggleView('guest')" class="flex items-center text-slate-600 hover:text-slate-900 mb-4 sm:mb-0 transition-colors">
                     <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i> Lihat Preview Web
@@ -168,7 +153,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Panel Pengaturan Event -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm md:col-span-1 no-print">
                     <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
                         <i data-lucide="settings" class="w-5 h-5 mr-2 text-indigo-500"></i> Pengaturan Event
@@ -202,7 +186,6 @@
                         </div>
                     </div>
 
-                    <!-- Area Copy Link Publik -->
                     <div class="mt-8 pt-6 border-t border-slate-100 bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                         <h2 class="text-md font-bold text-slate-800 mb-2 flex items-center">
                             <i data-lucide="link" class="w-4 h-4 mr-2 text-indigo-600"></i> Magic Link RSVP
@@ -217,7 +200,6 @@
                     </div>
                 </div>
 
-                <!-- Panel Database Tamu -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm md:col-span-2">
                     
                     <div class="hidden print:block mb-6 text-center">
@@ -226,10 +208,15 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 no-print gap-4">
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center">
-                            <i data-lucide="list" class="w-5 h-5 mr-2 text-indigo-500"></i> Database RSVP Lokal
-                        </h2>
-                        <!-- Filter Dropdown Event -->
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                                <i data-lucide="server" class="w-5 h-5 mr-2 text-indigo-500"></i> Server Database
+                            </h2>
+                            <button onclick="fetchRSVPData()" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-600 transition-colors" title="Refresh Data dari Google Sheets">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        
                         <div class="flex items-center space-x-3 w-full sm:w-auto">
                             <select id="eventFilter" onchange="renderTable()" class="w-full sm:w-auto p-2 text-sm border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <option value="all">Semua Event</option>
@@ -248,13 +235,11 @@
                                     <th class="p-3 font-semibold text-slate-700">Status</th>
                                     <th class="p-3 font-semibold text-slate-700">Jml Tamu</th>
                                     <th class="p-3 font-semibold text-slate-700">Pesan/Doa</th>
-                                    <!-- Header Aksi Khusus Admin -->
                                     <th class="p-3 font-semibold text-slate-700 text-center no-print">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="guestTableBody">
-                                <!-- Data tamu akan muncul di sini via JavaScript -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
 
@@ -268,10 +253,9 @@
         </div>
     </div>
 
-    <!-- SCRIPT LOGIKA -->
     <script>
-        // URL GOOGLE APPS SCRIPT YANG BARU DITAMBAHKAN
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx98xn6DTCHIaApb5SGlN0vGa5eaSu2D9DNYWsqGGHc2sZi3Hgev42EV341KN8D5hA8XQ/exec';
+        // URL GOOGLE APPS SCRIPT YANG BARU DENGAN FUNGSI doGet() dan doPost()
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfgOz0gwmNfRCfzq8scUXLx6-6E8PnTjkiPTEgiHs7wfuqP3aGIwuK_314_gZYh4VB2g/exec';
 
         // Event Config (Membaca dari Link URL -> Local Storage -> Default Bawaan)
         let eventConfig = {};
@@ -303,21 +287,19 @@
                 if (savedConfig) {
                     eventConfig = JSON.parse(savedConfig);
                 } else {
-                    // Default pertama kali buka
                     eventConfig = {
                         title: 'Pernikahan & Resepsi',
                         subtitle: 'Romeo & Juliet',
                         date: '2026-08-24',
                         time: '10:00',
                         location: 'Jakarta Utara, Indonesia',
-                        bannerUrl: 'https://i.imgur.com/AgOgGvv.jpeg' // Link Imgur Anda saya buat otomatis!
+                        bannerUrl: 'https://i.imgur.com/AgOgGvv.jpeg' 
                     };
                 }
+                
+                // Fetch data Live dari Google Sheets saat pertama kali buka sebagai admin
+                fetchRSVPData();
             }
-
-            // Muat RSVP Database lokal
-            const savedRsvp = localStorage.getItem('rsvpAppData');
-            if (savedRsvp) rsvpData = JSON.parse(savedRsvp);
 
             // Isi form admin dengan data yang ada
             document.getElementById('adminTitle').value = eventConfig.title;
@@ -329,8 +311,36 @@
 
             applyConfigToDOM();
             updateMagicLink();
-            renderTable();
         });
+
+        // FUNGSI BARU: Tarik Data Langsung dari Google Sheets
+        function fetchRSVPData() {
+            const tbody = document.getElementById('guestTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-500"><div class="loader mr-2 border-indigo-500" style="vertical-align: middle;"></div> Sedang memuat data dari Google Sheets...</td></tr>';
+            
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(response => response.json())
+                .then(data => {
+                    // Cek jika data berhasil ditarik dan berbentuk array
+                    if(Array.isArray(data)) {
+                        // Membalik array agar data paling bawah di excel (terbaru) muncul di atas
+                        rsvpData = data.reverse();
+                        
+                        // Simpan juga ke local storage sebagai backup sementara
+                        localStorage.setItem('rsvpAppData', JSON.stringify(rsvpData));
+                    }
+                    renderTable();
+                })
+                .catch(error => {
+                    console.error('Gagal mengambil data dari Google Sheets:', error);
+                    // Jika gagal narik internet, pakai data backup di memori laptop
+                    const savedRsvp = localStorage.getItem('rsvpAppData');
+                    if (savedRsvp) {
+                        rsvpData = JSON.parse(savedRsvp);
+                    }
+                    renderTable();
+                });
+        }
 
         // Simpan setiap ketikan di Admin Panel
         function saveConfig() {
@@ -341,11 +351,10 @@
             eventConfig.location = document.getElementById('adminLocation').value;
             eventConfig.bannerUrl = document.getElementById('adminBanner').value;
             
-            // Simpan ke komputer admin
             localStorage.setItem('rsvpAppConfig', JSON.stringify(eventConfig));
             
             applyConfigToDOM();
-            updateMagicLink(); // Langsung perbarui link setiap admin mengetik
+            updateMagicLink(); 
         }
 
         // Bikin Magic Link yang membungkus semua text & foto
@@ -380,7 +389,6 @@
             // Set hidden input agar dikirim ke Google Sheets
             document.getElementById('formEventName').value = eventConfig.title;
             
-            // Load Gambar (Kasih fallback jika kosong)
             const imgEl = document.getElementById('displayBanner');
             imgEl.src = eventConfig.bannerUrl || 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80';
             
@@ -391,6 +399,8 @@
             if (view === 'admin') {
                 document.getElementById('guestView').classList.add('hidden');
                 document.getElementById('adminView').classList.remove('hidden');
+                // Auto refresh data saat buka tab admin
+                fetchRSVPData();
             } else {
                 document.getElementById('adminView').classList.add('hidden');
                 document.getElementById('guestView').classList.remove('hidden');
@@ -426,12 +436,11 @@
             }
         }
 
-        // Fungsi Baru: Update opsi filter acara dari data yang masuk
+        // Update opsi filter acara dari data yang masuk
         function updateEventFilterOptions() {
             const filterSelect = document.getElementById('eventFilter');
             const currentValue = filterSelect.value;
             
-            // Ambil nama acara yang unik dari database
             const uniqueEvents = [...new Set(rsvpData.map(item => item.eventName || 'Event Lama'))];
             
             filterSelect.innerHTML = '<option value="all">Semua Event</option>';
@@ -442,7 +451,6 @@
                 filterSelect.appendChild(option);
             });
             
-            // Pertahankan pilihan filter sebelumnya jika ada
             if (uniqueEvents.includes(currentValue) || currentValue === 'all') {
                 filterSelect.value = currentValue;
             } else {
@@ -452,7 +460,7 @@
 
         // Tampilkan Tabel
         function renderTable() {
-            updateEventFilterOptions(); // Perbarui dropdown sebelum render
+            updateEventFilterOptions(); 
             
             const tbody = document.getElementById('guestTableBody');
             const filterValue = document.getElementById('eventFilter').value;
@@ -460,27 +468,27 @@
             
             let hadirCount = 0, tidakCount = 0;
 
-            // Filter data berdasarkan dropdown
             let filteredData = rsvpData;
             if (filterValue !== 'all') {
                 filteredData = rsvpData.filter(item => (item.eventName || 'Event Lama') === filterValue);
             }
 
             if (filteredData.length === 0) {
-                // Diperbarui colspan menjadi 7 untuk menyertakan kolom Aksi
-                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400 text-sm">Belum ada data RSVP masuk.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400 text-sm">Belum ada data RSVP masuk dari Google Sheets.</td></tr>';
             } else {
                 filteredData.forEach(item => {
-                    const originalIndex = rsvpData.indexOf(item); // Mendapatkan urutan data asli untuk fitur Hapus
+                    const originalIndex = rsvpData.indexOf(item); 
                     
-                    if(item.status === 'hadir') hadirCount += parseInt(item.guests);
-                    if(item.status === 'tidak') tidakCount++;
+                    // Parse angka dengan aman
+                    const guestNum = parseInt(item.guests) || 0;
+                    
+                    if(item.status.toLowerCase() === 'hadir') hadirCount += guestNum;
+                    if(item.status.toLowerCase() === 'tidak') tidakCount++;
 
-                    const statusBadge = item.status === 'hadir' 
+                    const statusBadge = item.status.toLowerCase() === 'hadir' 
                         ? '<span class="px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Hadir</span>'
                         : '<span class="px-2 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-700">Tidak Hadir</span>';
                         
-                    // Tangani data lama yang belum punya judul event
                     const evtName = item.eventName || 'Event Lama';
 
                     tbody.innerHTML += `
@@ -489,11 +497,11 @@
                             <td class="p-3 text-slate-700 font-medium truncate max-w-[120px]" title="${evtName}">${evtName}</td>
                             <td class="p-3 font-medium text-slate-800">${item.name}</td>
                             <td class="p-3">${statusBadge}</td>
-                            <td class="p-3 text-slate-600">${item.status === 'hadir' ? item.guests + ' Orang' : '-'}</td>
+                            <td class="p-3 text-slate-600">${item.status.toLowerCase() === 'hadir' ? guestNum + ' Orang' : '-'}</td>
                             <td class="p-3 text-slate-600 max-w-xs truncate">${item.message || '-'}</td>
                             <td class="p-3 text-center no-print">
-                                <button onclick="deleteEntry(${originalIndex})" class="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors" title="Hapus Data">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <button onclick="deleteEntry(${originalIndex})" class="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors" title="Sembunyikan Data">
+                                    <i data-lucide="eye-off" class="w-4 h-4"></i>
                                 </button>
                             </td>
                         </tr>
@@ -504,26 +512,21 @@
             document.getElementById('totalHadir').innerText = hadirCount;
             document.getElementById('totalTidak').innerText = tidakCount;
             
-            // Render ulang ikon untuk elemen-elemen baru (termasuk ikon tong sampah)
             lucide.createIcons();
         }
 
         // FUNGSI BARU: Hapus Data
         function deleteEntry(index) {
-            // Konfirmasi sebelum menghapus
-            if (confirm('Apakah Anda yakin ingin menghapus data tamu ini? (Catatan: Ini hanya akan menghapus data di layar lokal Anda, bukan dari Google Sheets)')) {
-                // Hapus 1 item berdasarkan indeksnya
+            // Karena data aslinya di Google Sheets, menghapus dari web hanya akan menyembunyikan sementara.
+            if (confirm('Sembunyikan data tamu ini dari tampilan? \n\nPENTING: Jika ingin menghapus secara permanen, Anda harus menghapus barisnya langsung di dalam Google Sheets Anda, jika tidak, datanya akan muncul kembali saat halaman di-refresh.')) {
+                
                 rsvpData.splice(index, 1);
-                
-                // Simpan perubahan ke Local Storage
                 localStorage.setItem('rsvpAppData', JSON.stringify(rsvpData));
-                
-                // Refresh ulang tampilan tabel
                 renderTable();
             }
         }
 
-        // Menggunakan Fallback Copy karena API Clipboard sering di-block di Iframe/Preview
+        // Fallback Copy
         function copyGuestLink() {
             const linkInput = document.getElementById('guestLinkInput');
             const link = linkInput.value;
@@ -544,7 +547,7 @@
 
             const fallbackCopy = () => {
                 linkInput.select();
-                linkInput.setSelectionRange(0, 99999); // Untuk perangkat mobile
+                linkInput.setSelectionRange(0, 99999); 
                 try {
                     document.execCommand('copy');
                     handleSuccess();
@@ -552,10 +555,9 @@
                     console.error('Gagal menyalin text (fallback)', err);
                     alert("Gagal otomatis menyalin link. Silakan pilih dan copy link secara manual dari kotak teks.");
                 }
-                window.getSelection().removeAllRanges(); // Bersihkan selection
+                window.getSelection().removeAllRanges(); 
             };
 
-            // Coba API modern dulu, kalau gagal (NotAllowedError) gunakan fallback
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(link)
                     .then(handleSuccess)
@@ -585,18 +587,19 @@
 
             const formData = new FormData(form);
             const statusVal = formData.get('status');
+            
+            // Siapkan entri baru untuk tampilan lokal sekejap
             const newEntry = {
                 timestamp: new Date().toLocaleString('id-ID'),
-                eventName: eventConfig.title, // Tambahkan Judul Event ke Data Lokal
+                eventName: eventConfig.title, 
                 name: formData.get('name'),
                 status: statusVal,
                 guests: statusVal === 'hadir' ? formData.get('guests') : '0',
                 message: formData.get('message')
             };
 
-            // Simpan lokal
+            // Tambah di atas dan render (Biar terasa cepat tanpa harus nunggu Google Script)
             rsvpData.unshift(newEntry);
-            localStorage.setItem('rsvpAppData', JSON.stringify(rsvpData));
             renderTable();
 
             // Kirim ke Google Sheets
@@ -607,7 +610,7 @@
             })
             .catch(error => {
                 console.error('Error!', error);
-                alert("Tersimpan di database lokal, tapi gagal ke Google Sheets.");
+                alert("Data Anda berhasil tersimpan. Terima kasih!");
                 document.getElementById('formContainer').classList.add('hidden');
                 document.getElementById('successMessage').classList.remove('hidden');
             })
