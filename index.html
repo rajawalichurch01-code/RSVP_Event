@@ -254,25 +254,22 @@
     </div>
 
     <script>
-        // URL GOOGLE APPS SCRIPT YANG BARU DENGAN FUNGSI doGet() dan doPost()
+        // GANTI URL INI DENGAN URL DEPLOYMENT GOOGLE SCRIPT ANDA YANG BARU!
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfgOz0gwmNfRCfzq8scUXLx6-6E8PnTjkiPTEgiHs7wfuqP3aGIwuK_314_gZYh4VB2g/exec';
 
-        // Event Config (Membaca dari Link URL -> Local Storage -> Default Bawaan)
+        // Event Config
         let eventConfig = {};
         let rsvpData = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             
-            // 1. Cek parameter URL (Ini yang bikin Magic Link bekerja!)
             const params = new URLSearchParams(window.location.search);
             const isGuest = params.get('role') === 'guest';
 
             if (isGuest) {
-                // Sembunyikan tombol admin jika ini tamu
                 document.getElementById('adminAccessBtn').classList.add('hidden');
                 
-                // Ambil data langsung dari link URL
                 eventConfig = {
                     title: params.get('t') || 'Pernikahan & Resepsi',
                     subtitle: params.get('s') || 'Nama Pasangan',
@@ -282,7 +279,6 @@
                     bannerUrl: params.get('b') || 'https://i.imgur.com/AgOgGvv.jpeg'
                 };
             } else {
-                // Jika Admin, ambil dari Local Storage komputer admin
                 const savedConfig = localStorage.getItem('rsvpAppConfig');
                 if (savedConfig) {
                     eventConfig = JSON.parse(savedConfig);
@@ -297,11 +293,9 @@
                     };
                 }
                 
-                // Fetch data Live dari Google Sheets saat pertama kali buka sebagai admin
                 fetchRSVPData();
             }
 
-            // Isi form admin dengan data yang ada
             document.getElementById('adminTitle').value = eventConfig.title;
             document.getElementById('adminSubtitle').value = eventConfig.subtitle;
             document.getElementById('adminDate').value = eventConfig.date;
@@ -313,7 +307,6 @@
             updateMagicLink();
         });
 
-        // FUNGSI BARU: Tarik Data Langsung dari Google Sheets
         function fetchRSVPData() {
             const tbody = document.getElementById('guestTableBody');
             tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-500"><div class="loader mr-2 border-indigo-500" style="vertical-align: middle;"></div> Sedang memuat data dari Google Sheets...</td></tr>';
@@ -321,19 +314,14 @@
             fetch(GOOGLE_SCRIPT_URL)
                 .then(response => response.json())
                 .then(data => {
-                    // Cek jika data berhasil ditarik dan berbentuk array
                     if(Array.isArray(data)) {
-                        // Membalik array agar data paling bawah di excel (terbaru) muncul di atas
                         rsvpData = data.reverse();
-                        
-                        // Simpan juga ke local storage sebagai backup sementara
                         localStorage.setItem('rsvpAppData', JSON.stringify(rsvpData));
                     }
                     renderTable();
                 })
                 .catch(error => {
                     console.error('Gagal mengambil data dari Google Sheets:', error);
-                    // Jika gagal narik internet, pakai data backup di memori laptop
                     const savedRsvp = localStorage.getItem('rsvpAppData');
                     if (savedRsvp) {
                         rsvpData = JSON.parse(savedRsvp);
@@ -342,7 +330,6 @@
                 });
         }
 
-        // Simpan setiap ketikan di Admin Panel
         function saveConfig() {
             eventConfig.title = document.getElementById('adminTitle').value;
             eventConfig.subtitle = document.getElementById('adminSubtitle').value;
@@ -357,7 +344,6 @@
             updateMagicLink(); 
         }
 
-        // Bikin Magic Link yang membungkus semua text & foto
         function updateMagicLink() {
             const baseUrl = window.location.origin + window.location.pathname;
             const p = new URLSearchParams();
@@ -372,7 +358,6 @@
             document.getElementById('guestLinkInput').value = `${baseUrl}?${p.toString()}`;
         }
 
-        // Terapkan text dan gambar ke halaman depan
         function applyConfigToDOM() {
             let formattedDate = eventConfig.date;
             if (eventConfig.date) {
@@ -386,7 +371,6 @@
             document.getElementById('displayTime').innerText = eventConfig.time + ' WIB';
             document.getElementById('displayLocation').innerText = eventConfig.location;
             
-            // Set hidden input agar dikirim ke Google Sheets
             document.getElementById('formEventName').value = eventConfig.title;
             
             const imgEl = document.getElementById('displayBanner');
@@ -399,7 +383,6 @@
             if (view === 'admin') {
                 document.getElementById('guestView').classList.add('hidden');
                 document.getElementById('adminView').classList.remove('hidden');
-                // Auto refresh data saat buka tab admin
                 fetchRSVPData();
             } else {
                 document.getElementById('adminView').classList.add('hidden');
@@ -407,7 +390,6 @@
             }
         }
 
-        // Logic Radio Button Hadir/Tidak
         function toggleGuestSelect() {
             const status = document.querySelector('input[name="status"]:checked').value;
             const guestSelectDiv = document.getElementById('guestSelectDiv');
@@ -436,7 +418,6 @@
             }
         }
 
-        // Update opsi filter acara dari data yang masuk
         function updateEventFilterOptions() {
             const filterSelect = document.getElementById('eventFilter');
             const currentValue = filterSelect.value;
@@ -458,7 +439,6 @@
             }
         }
 
-        // Tampilkan Tabel
         function renderTable() {
             updateEventFilterOptions(); 
             
@@ -479,7 +459,6 @@
                 filteredData.forEach(item => {
                     const originalIndex = rsvpData.indexOf(item); 
                     
-                    // Parse angka dengan aman
                     const guestNum = parseInt(item.guests) || 0;
                     
                     if(item.status.toLowerCase() === 'hadir') hadirCount += guestNum;
@@ -515,9 +494,7 @@
             lucide.createIcons();
         }
 
-        // FUNGSI BARU: Hapus Data
         function deleteEntry(index) {
-            // Karena data aslinya di Google Sheets, menghapus dari web hanya akan menyembunyikan sementara.
             if (confirm('Sembunyikan data tamu ini dari tampilan? \n\nPENTING: Jika ingin menghapus secara permanen, Anda harus menghapus barisnya langsung di dalam Google Sheets Anda, jika tidak, datanya akan muncul kembali saat halaman di-refresh.')) {
                 
                 rsvpData.splice(index, 1);
@@ -526,7 +503,6 @@
             }
         }
 
-        // Fallback Copy
         function copyGuestLink() {
             const linkInput = document.getElementById('guestLinkInput');
             const link = linkInput.value;
@@ -571,7 +547,7 @@
         }
 
         // ==========================================
-        // SUBMIT FORM RSVP
+        // SUBMIT FORM RSVP (UPDATED)
         // ==========================================
         const form = document.getElementById('rsvpForm');
         form.addEventListener('submit', e => {
@@ -588,7 +564,9 @@
             const formData = new FormData(form);
             const statusVal = formData.get('status');
             
-            // Siapkan entri baru untuk tampilan lokal sekejap
+            // Konversi FormData ke format URL Encoded agar mudah dibaca Google Apps Script
+            const urlEncodedData = new URLSearchParams(formData).toString();
+
             const newEntry = {
                 timestamp: new Date().toLocaleString('id-ID'),
                 eventName: eventConfig.title, 
@@ -598,19 +576,25 @@
                 message: formData.get('message')
             };
 
-            // Tambah di atas dan render (Biar terasa cepat tanpa harus nunggu Google Script)
             rsvpData.unshift(newEntry);
             renderTable();
 
-            // Kirim ke Google Sheets
-            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' })
+            // Mengirim data menggunakan headers Content-Type
+            fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                body: urlEncodedData,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                mode: 'no-cors' 
+            })
             .then(() => {
                 document.getElementById('formContainer').classList.add('hidden');
                 document.getElementById('successMessage').classList.remove('hidden');
             })
             .catch(error => {
                 console.error('Error!', error);
-                alert("Data Anda berhasil tersimpan. Terima kasih!");
+                alert("Ada kendala koneksi, tapi data Anda berhasil tersimpan. Terima kasih!");
                 document.getElementById('formContainer').classList.add('hidden');
                 document.getElementById('successMessage').classList.remove('hidden');
             })
